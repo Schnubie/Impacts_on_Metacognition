@@ -300,6 +300,7 @@
         } catch (error) {
             console.error('Error during form initialization:', error);
         }
+        console.log("Final experiment data before submission:", jsPsych.data.get().json());
     });
 
 // Initialize jsPsych
@@ -458,28 +459,43 @@ const SociSurveyIntegration = {
         });
     },
 
-    submit() {
-        try {
-            const form = document.getElementById('socisurvey_form');
-            if (!form) {
-                console.error('Form not found during submission');
-                return false;
-            }
-
-            // Log all form values before submission
-            const formData = new FormData(form);
-            for (let [name, value] of formData.entries()) {
-                console.log(`Submitting ${name}: ${value}`);
-            }
-
-            form.submit();
-            return true;
-        } catch (error) {
-            console.error('Form submission error:', error);
+   SociSurveyIntegration.submit = function () {
+    try {
+        const form = document.getElementById('socisurvey_form');
+        if (!form) {
+            console.error('Form not found during submission');
             return false;
         }
+
+        // 🟢 Retrieve all jsPsych experiment data
+        var experimentData = jsPsych.data.get().json();
+        console.log("Experiment Data:", experimentData); // Debugging
+
+        // 🟢 Ensure the form has a field to store JSON experiment data
+        let jsonDataField = document.getElementById('surveyData');
+        if (!jsonDataField) {
+            jsonDataField = document.createElement('input');
+            jsonDataField.type = 'hidden';
+            jsonDataField.id = 'surveyData';
+            jsonDataField.name = 'surveyData';
+            form.appendChild(jsonDataField);
+        }
+        jsonDataField.value = experimentData;
+
+        // 🟢 Log form data before submission for debugging
+        console.log("Final Form Data before submission:", new FormData(form));
+
+        // 🟢 Submit the form after a short delay to ensure all data is recorded
+        setTimeout(() => {
+            form.submit();
+        }, 500);
+
+        return true;
+    } catch (error) {
+        console.error('Form submission error:', error);
+        return false;
     }
-};
+}
     // Export for use in main experiment
         const DataCollector = {
             experimentStart: null,
