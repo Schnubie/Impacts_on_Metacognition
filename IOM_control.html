@@ -462,44 +462,63 @@ const SociSurveyIntegration = {
         console.log("Checking jsPsych data:", jsPsych.data.get().values());
     },
 
-    submit() {
-        try {
-            const form = document.getElementById('socisurvey_form');
-            if (!form) {
-                console.error('Form not found during submission');
-                return false;
-            }
+    SociSurveyIntegration = {
+    submit: function () {
+        console.log("🚀 Starting final submission process...");
 
-            // Retrieve all jsPsych experiment data
-            var experimentData = jsPsych.data.get().json();
-            console.log("Experiment Data:", experimentData);
-
-            // Ensure the form has a field to store JSON experiment data
-            let jsonDataField = document.getElementById('surveyData');
-            if (!jsonDataField) {
-                jsonDataField = document.createElement('input');
-                jsonDataField.type = 'hidden';
-                jsonDataField.id = 'surveyData';
-                jsonDataField.name = 'surveyData';
-                form.appendChild(jsonDataField);
-            }
-            jsonDataField.value = experimentData;
-
-            // Log form data before submission for debugging
-            console.log("Final Form Data before submission:", new FormData(form));
-
-            // Submit the form after a short delay to ensure all data is recorded
-            setTimeout(() => {
-                form.submit();
-            }, 500);
-
-            return true;
-        } catch (error) {
-            console.error('Form submission error:', error);
+        // Ensure form exists
+        const form = document.getElementById('socisurvey_form');
+        if (!form) {
+            console.error("❌ Error: Form with id 'socisurvey_form' not found.");
             return false;
         }
+
+        // Ensure jsPsych exists and contains data
+        if (typeof jsPsych === "undefined" || !jsPsych.data) {
+            console.error("❌ Error: jsPsych is not initialized.");
+            return false;
+        }
+
+        const experimentData = jsPsych.data.get().json();
+        if (!experimentData || experimentData === "[]") {
+            console.error("❌ Error: No experiment data found!");
+            return false;
+        }
+        console.log("✅ Experiment Data:", experimentData);
+
+        // Ensure the hidden input field exists
+        let jsonDataField = document.getElementById('surveyData');
+        if (!jsonDataField) {
+            console.warn("⚠️ Warning: 'surveyData' field missing, creating it now.");
+            jsonDataField = document.createElement('input');
+            jsonDataField.type = 'hidden';
+            jsonDataField.id = 'surveyData';
+            jsonDataField.name = 'surveyData';
+            form.appendChild(jsonDataField);
+        }
+
+        // Set the value safely
+        jsonDataField.value = experimentData;
+
+        // Log form data before submitting
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+            console.log(`🔹 ${key}: ${value}`);
+        }
+
+        // Submit with a slight delay to ensure values are set
+        setTimeout(() => {
+            console.log("🚀 Submitting form...");
+            form.submit();
+        }, 500);
+
+        return true;
     }
 };
+
+// Call the function explicitly to test
+SociSurveyIntegration.submit();
+
 
     console.log('Condition from URL:', experimentCondition);
     const DataCollector = {
